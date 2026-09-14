@@ -1,251 +1,186 @@
-import { useState, type FormEvent } from 'react';
-import { Mail, MessageSquare, Bug, Lightbulb, ShieldCheck, CheckCircle2, Send } from 'lucide-react';
-import LegalPageLayout, { Section, ExtLink } from '@/components/LegalPageLayout';
-import { usePageMeta } from '@/lib/usePageMeta';
-import { site } from '@/data/site';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Mail, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { navigate } from '@/lib/router';
 
-const CONTACT_EMAIL = site.email;
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xwlkdjka';
 
-const reasons = [
-  {
-    icon: Bug,
-    title: 'Report a bug',
-    desc: 'Something is broken or giving the wrong result. Tell us the tool and what happened.',
-  },
-  {
-    icon: Lightbulb,
-    title: 'Suggest a tool',
-    desc: 'Need a converter, calculator or utility we do not have yet? We are always adding more.',
-  },
-  {
-    icon: MessageSquare,
-    title: 'General feedback',
-    desc: 'Questions, comments or partnership enquiries — we read everything we receive.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Privacy requests',
-    desc: 'Questions about cookies, advertising data or your privacy rights under GDPR or CCPA.',
-  },
-];
+interface FormState {
+  name: string;
+  email: string;
+  message: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  message?: string;
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Contact() {
-  usePageMeta({
-    title: 'Contact Us | ToolKit',
-    description:
-      'Get in touch with the ToolKit team. Report a bug, suggest a new online tool, send feedback or ask a privacy question. We usually reply within 48 hours.',
-    keywords: 'contact ToolKit, support, report a bug, suggest a tool, feedback, privacy request',
-    path: '/contact',
-  });
+  const [form, setForm] = useState<FormState>({ name: '', email: '', message: '' });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState('General feedback');
-  const [message, setMessage] = useState('');
-  const [sent, setSent] = useState(false);
+  useEffect(() => {
+    if (!showToast) return;
+    const timer = setTimeout(() => setShowToast(false), 3500);
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  function validate(): boolean {
+    const e: FormErrors = {};
+    if (!form.name.trim()) e.name = 'Name is required / 请填写姓名';
+    if (!form.email.trim()) {
+      e.email = 'Email is required / 请填写邮箱';
+    } else if (!EMAIL_REGEX.test(form.email.trim())) {
+      e.email = 'Invalid email format / 邮箱格式不正确';
+    }
+    if (!form.message.trim()) e.message = 'Message is required / 请填写留言内容';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
+
+  function handleChange(field: keyof FormState, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+    if (submitError) setSubmitError(null);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
 
-    // No backend is required: hand the message off to the visitor's own mail
-    // client with a pre-filled subject and body. This keeps the site fully
-    // static (deployable to Cloudflare Pages) and means no form data is ever
-    // stored on our servers.
-    const bodyLines = [
-      `Name: ${name || 'Not provided'}`,
-      `Email: ${email || 'Not provided'}`,
-      '',
-      message,
-    ];
-    const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-      `[ToolKit] ${subject}`
-    )}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Request failed');
+      setShowToast(true);
+      setForm({ name: '', email: '', message: '' });
+    } catch {
+      setSubmitError('Submission failed. Please try again / 提交失败，请重试');
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
-    window.location.href = mailto;
-    setSent(true);
-  };
+  const inputErrorClass = (field: keyof FormErrors) =>
+    errors[field] ? 'border-red-400 focus:ring-red-300 focus:border-red-400' : '';
 
   return (
-    <LegalPageLayout
-      title="Contact Us"
-      intro={
-        <>
-          Have a question, a bug report or an idea for a new tool? We would love
-          to hear from you. Fill in the form below, or email us directly at{' '}
-          <ExtLink href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</ExtLink>. We
-          usually respond within 48 hours on business days.
-        </>
-      }
-    >
-      <Section title="What Can We Help With?">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {reasons.map((r) => (
-            <div
-              key={r.title}
-              className="flex gap-3 rounded-2xl border border-ink-100 bg-white px-5 py-4"
-            >
-              <span className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                <r.icon className="w-5 h-5" />
-              </span>
-              <div>
-                <p className="font-semibold text-ink-800 text-sm">{r.title}</p>
-                <p className="text-ink-600 text-sm leading-relaxed mt-0.5">{r.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <button onClick={() => navigate('/')} className="btn-ghost mb-6 -ml-2">
+        <ArrowLeft className="w-4 h-4" />
+        Back to all tools
+      </button>
 
-      <Section title="Send Us a Message">
-        {sent ? (
-          <div className="rounded-2xl border border-brand-200 bg-brand-50 px-6 py-8 text-center">
-            <CheckCircle2 className="w-10 h-10 text-brand-600 mx-auto mb-3" />
-            <p className="font-semibold text-ink-900 text-lg mb-1">
-              Thank you for reaching out!
-            </p>
-            <p className="text-ink-600 text-sm">
-              Your email client should have opened with your message ready to
-              send. If it did not, please email us directly at{' '}
-              <ExtLink href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</ExtLink>.
-            </p>
-            <button
-              onClick={() => setSent(false)}
-              className="btn-ghost mt-4 text-sm"
-            >
-              Write another message
-            </button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-ink-900 mb-2">Contact Us</h1>
+        <p className="text-ink-500">联系我们 — We'd love to hear from you</p>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-ink-200 p-6 sm:p-8 shadow-sm">
+        {submitError && (
+          <div className="mb-6 flex items-start gap-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <span>{submitError}</span>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="contact-name" className="block text-sm font-medium text-ink-700 mb-2">
-                  Your name
-                </label>
-                <input
-                  id="contact-name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Doe"
-                  autoComplete="name"
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label htmlFor="contact-email" className="block text-sm font-medium text-ink-700 mb-2">
-                  Your email
-                </label>
-                <input
-                  id="contact-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  className="input-field"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="contact-subject" className="block text-sm font-medium text-ink-700 mb-2">
-                What is this about?
-              </label>
-              <select
-                id="contact-subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="input-field"
-              >
-                <option>General feedback</option>
-                <option>Report a bug</option>
-                <option>Suggest a new tool</option>
-                <option>Privacy or advertising question</option>
-                <option>Business or partnership enquiry</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="contact-message" className="block text-sm font-medium text-ink-700 mb-2">
-                Message
-              </label>
-              <textarea
-                id="contact-message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                required
-                rows={6}
-                placeholder="Tell us what is on your mind…"
-                className="input-field resize-y h-auto"
-              />
-            </div>
-
-            <p className="text-xs text-ink-400">
-              By sending a message you agree to our{' '}
-              <a href="/privacy-policy" className="underline hover:text-brand-600">
-                Privacy Policy
-              </a>
-              . We only use your details to reply to you and never sell them.
-            </p>
-
-            <button type="submit" className="btn-primary">
-              <Send className="w-4 h-4" />
-              Send message
-            </button>
-          </form>
         )}
-      </Section>
 
-      <Section title="Other Ways to Reach Us">
-        <div className="rounded-2xl border border-ink-100 bg-white px-5 py-4 flex items-start gap-3">
-          <span className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-            <Mail className="w-5 h-5" />
-          </span>
+        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          {/* Name */}
           <div>
-            <p className="font-semibold text-ink-800 text-sm">Email</p>
-            <p className="text-ink-600 text-sm mt-0.5">
-              <ExtLink href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</ExtLink>
-            </p>
+            <label htmlFor="name" className="block text-sm font-medium text-ink-700 mb-1.5">
+              Name <span className="text-ink-400">/ 姓名</span>
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={form.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className={`input-field ${inputErrorClass('name')}`}
+              placeholder="Your name / 您的姓名"
+              autoComplete="name"
+            />
+            {errors.name && <p className="mt-1.5 text-sm text-red-500">{errors.name}</p>}
           </div>
-        </div>
-      </Section>
 
-      <Section title="Before You Write">
-        <p>
-          Many common questions are already answered on our information pages:
-        </p>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>
-            For questions about ads and data, see our{' '}
-            <a href="/privacy-policy" className="text-brand-600 underline hover:text-brand-700">
-              Privacy Policy
-            </a>
-            .
-          </li>
-          <li>
-            For accuracy of results and tool limitations, see our{' '}
-            <a href="/disclaimer" className="text-brand-600 underline hover:text-brand-700">
-              Disclaimer
-            </a>
-            .
-          </li>
-          <li>
-            For the rules governing use of the site, see our{' '}
-            <a href="/terms" className="text-brand-600 underline hover:text-brand-700">
-              Terms of Service
-            </a>
-            .
-          </li>
-          <li>
-            To learn more about who we are, see our{' '}
-            <a href="/about" className="text-brand-600 underline hover:text-brand-700">
-              About page
-            </a>
-            .
-          </li>
-        </ul>
-      </Section>
-    </LegalPageLayout>
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-ink-700 mb-1.5">
+              Email <span className="text-ink-400">/ 邮箱</span>
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className={`input-field ${inputErrorClass('email')}`}
+              placeholder="you@example.com / 您的邮箱"
+              autoComplete="email"
+            />
+            {errors.email && <p className="mt-1.5 text-sm text-red-500">{errors.email}</p>}
+          </div>
+
+          {/* Message */}
+          <div>
+            <label htmlFor="message" className="block text-sm font-medium text-ink-700 mb-1.5">
+              Message <span className="text-ink-400">/ 留言</span>
+            </label>
+            <textarea
+              id="message"
+              value={form.message}
+              onChange={(e) => handleChange('message', e.target.value)}
+              rows={5}
+              className={`input-field resize-y ${inputErrorClass('message')}`}
+              placeholder="Tell us what you think… / 告诉我们您的想法…"
+            />
+            {errors.message && <p className="mt-1.5 text-sm text-red-500">{errors.message}</p>}
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn-primary w-full sm:w-auto"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Sending…
+              </>
+            ) : (
+              <>
+                <Mail className="w-4 h-4" />
+                Send Message / 发送留言
+              </>
+            )}
+          </button>
+        </form>
+      </div>
+
+      <p className="text-center text-sm text-ink-400 mt-6">
+        Email / 邮箱：xlj19820929@gmail.com
+      </p>
+
+      {/* Toast */}
+      <div
+        className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
+          showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <div className="flex items-center gap-3 rounded-xl bg-ink-900 text-white px-5 py-3.5 shadow-lg">
+          <CheckCircle2 className="w-5 h-5 text-brand-400" />
+          <span className="text-sm font-medium">Message sent! / 留言已发送</span>
+        </div>
+      </div>
+    </div>
   );
 }
