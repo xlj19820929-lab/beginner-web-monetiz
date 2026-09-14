@@ -1,10 +1,17 @@
 import { useState, useMemo } from 'react';
-import { Clipboard, HelpCircle } from 'lucide-react';
+import { Clipboard } from 'lucide-react';
 import ToolHeader from '@/components/ToolHeader';
 import CopyButton from '@/components/CopyButton';
 import AdSlot from '@/components/AdSlot';
-import { toolsById, tools } from '@/data/tools';
-import { navigate } from '@/lib/router';
+import {
+  LocalProcessingNote,
+  HowToUse,
+  Faq,
+  OtherTools,
+  type BiText,
+  type FaqItem,
+} from '@/components/ToolExtras';
+import { toolsById } from '@/data/tools';
 
 const conversions = [
   { id: 'upper', label: 'UPPER CASE', fn: (t: string) => t.toUpperCase() },
@@ -20,7 +27,7 @@ const conversions = [
   { id: 'kebab', label: 'kebab-case', fn: (t: string) => t.trim().toLowerCase().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '') },
 ];
 
-const howToSteps = [
+const howToSteps: BiText[] = [
   {
     en: 'Type or paste your text into the input box.',
     zh: '在输入框输入或者粘贴文本。',
@@ -35,7 +42,7 @@ const howToSteps = [
   },
 ];
 
-const faqs = [
+const faqs: FaqItem[] = [
   {
     questionEn: 'Will you save my input text?',
     questionZh: '你们会保存我输入的文本吗？',
@@ -61,7 +68,6 @@ const faqs = [
 
 export default function CaseConverter() {
   const tool = toolsById['case-converter'];
-  const otherTools = tools.filter((t) => t.id !== tool.id);
   const [text, setText] = useState('');
   const [activeId, setActiveId] = useState('upper');
 
@@ -116,91 +122,14 @@ export default function CaseConverter() {
       </div>
 
       {/* Local processing note */}
-      <p className="text-sm text-ink-500 leading-relaxed mt-5">
-        All processing runs locally in your browser. Your text will never be
-        uploaded or stored on our server.
-        <br />
-        所有计算在浏览器本地执行，你的文本永远不会上传或保存在我们服务器。
-      </p>
+      <LocalProcessingNote
+        en="All processing runs locally in your browser. Your text will never be uploaded or stored on our server."
+        zh="所有计算在浏览器本地执行，你的文本永远不会上传或保存在我们服务器。"
+      />
 
-      {/* How to use */}
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold text-ink-900 mb-4">
-          How To Use <span className="text-ink-500 font-normal">使用方法</span>
-        </h2>
-        <ol className="space-y-3">
-          {howToSteps.map((step, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <span className="w-6 h-6 rounded-full bg-brand-50 text-brand-600 text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
-                {i + 1}
-              </span>
-              <p className="text-sm text-ink-600 leading-relaxed">
-                {step.en}
-                <br />
-                {step.zh}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* FAQ */}
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold text-ink-900 mb-5">
-          Frequently Asked Questions{' '}
-          <span className="text-ink-500 font-normal">常见问题</span>
-        </h2>
-        <div className="space-y-6">
-          {faqs.map((faq, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <HelpCircle className="w-4 h-4 text-brand-600 shrink-0 mt-1" />
-              <div>
-                <p className="font-semibold text-ink-800 text-sm leading-relaxed">
-                  {faq.questionEn}
-                  <br />
-                  {faq.questionZh}
-                </p>
-                <p className="text-sm text-ink-500 leading-relaxed mt-1.5">
-                  {faq.answerEn}
-                  <br />
-                  {faq.answerZh}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Other tools */}
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold text-ink-900 mb-4">
-          Other Tools <span className="text-ink-500 font-normal">其他工具</span>
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {otherTools.map((other) => {
-            const Icon = other.icon;
-            return (
-              <button
-                key={other.id}
-                onClick={() => navigate(`/tools/${other.id}`)}
-                className="tool-card text-left group"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 transition-colors group-hover:bg-brand-600 group-hover:text-white">
-                    <Icon className="w-6 h-6" />
-                  </span>
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-ink-900 group-hover:text-brand-600 transition-colors">
-                      {other.name}
-                    </h3>
-                    <p className="text-sm text-ink-500 mt-0.5">{other.short}</p>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      <HowToUse steps={howToSteps} />
+      <Faq items={faqs} />
+      <OtherTools currentToolId={tool.id} />
 
       <AdSlot slot="3333333333" />
     </div>

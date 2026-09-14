@@ -2,6 +2,14 @@ import { useState, useMemo } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
 import ToolHeader from '@/components/ToolHeader';
 import AdSlot from '@/components/AdSlot';
+import {
+  LocalProcessingNote,
+  HowToUse,
+  Faq,
+  OtherTools,
+  type BiText,
+  type FaqItem,
+} from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
 
 type Category = 'length' | 'weight' | 'temperature';
@@ -53,6 +61,45 @@ const categoryLabels: Record<Category, string> = {
   weight: 'Weight',
   temperature: 'Temperature',
 };
+
+const howToSteps: BiText[] = [
+  {
+    en: 'Choose a conversion category such as length, weight or temperature.',
+    zh: '选择转换类别，例如长度、重量或温度。',
+  },
+  {
+    en: 'Enter your value and pick the from and to units.',
+    zh: '输入数值，并选择原始单位和目标单位。',
+  },
+  {
+    en: 'Read the converted result or use the swap button to reverse the units.',
+    zh: '查看转换结果，或点击交换按钮反转单位。',
+  },
+];
+
+const faqs: FaqItem[] = [
+  {
+    questionEn: 'Do you store the values I convert?',
+    questionZh: '你们会保存我转换的数值吗？',
+    answerEn:
+      'No. All conversions are calculated locally in your browser. The values you enter never leave your device.',
+    answerZh: '不会。所有换算都在你的浏览器本地计算，你输入的数值不会离开你的设备。',
+  },
+  {
+    questionEn: 'Which units and categories are supported?',
+    questionZh: '支持哪些单位和类别？',
+    answerEn:
+      'It supports length, weight and temperature, including both metric and imperial units such as meters, feet, kilograms, pounds, Celsius and Fahrenheit.',
+    answerZh:
+      '支持长度、重量和温度三类，包含公制与英制单位，例如米、英尺、千克、磅、摄氏度和华氏度。',
+  },
+  {
+    questionEn: 'Is this unit converter free?',
+    questionZh: '这个单位转换工具是免费的吗？',
+    answerEn: 'Yes, it is completely free and requires no account or signup.',
+    answerZh: '是的，完全免费，无需注册账号。',
+  },
+];
 
 export default function UnitConverter() {
   const tool = toolsById['unit-converter'];
@@ -173,6 +220,17 @@ export default function UnitConverter() {
           </div>
         )}
       </div>
+
+      {/* Local processing note */}
+      <LocalProcessingNote
+        en="All processing runs locally in your browser. The values you convert will never be uploaded or stored on our server."
+        zh="所有计算在浏览器本地执行，你换算的数值永远不会上传或保存在我们服务器。"
+      />
+
+      <HowToUse steps={howToSteps} />
+      <Faq items={faqs} />
+      <OtherTools currentToolId={tool.id} />
+
       <AdSlot slot="6666666666" />
     </div>
   );

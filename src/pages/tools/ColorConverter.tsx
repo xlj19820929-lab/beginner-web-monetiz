@@ -2,6 +2,14 @@ import { useState, useMemo } from 'react';
 import ToolHeader from '@/components/ToolHeader';
 import CopyButton from '@/components/CopyButton';
 import AdSlot from '@/components/AdSlot';
+import {
+  LocalProcessingNote,
+  HowToUse,
+  Faq,
+  OtherTools,
+  type BiText,
+  type FaqItem,
+} from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -32,6 +40,45 @@ function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: n
   }
   return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
 }
+
+const howToSteps: BiText[] = [
+  {
+    en: 'Pick a color with the color picker or type a HEX value.',
+    zh: '使用取色器选择颜色，或直接输入 HEX 值。',
+  },
+  {
+    en: 'The HEX, RGB and HSL values update instantly as you change the color.',
+    zh: '颜色变化时，HEX、RGB 和 HSL 数值会实时更新。',
+  },
+  {
+    en: 'Click the copy button next to any format to copy that value.',
+    zh: '点击任意格式旁的复制按钮，即可复制该数值。',
+  },
+];
+
+const faqs: FaqItem[] = [
+  {
+    questionEn: 'Are the colors I pick sent to your server?',
+    questionZh: '我选择的颜色会上传到服务器吗？',
+    answerEn:
+      'No. All color conversion happens locally in your browser. We never receive or store the colors you pick.',
+    answerZh: '不会。所有颜色转换都在你的浏览器本地完成，我们不会接收或存储你选择的颜色。',
+  },
+  {
+    questionEn: 'Which color formats can I convert between?',
+    questionZh: '支持哪些颜色格式互转？',
+    answerEn:
+      'It converts between HEX, RGB and HSL. Enter any HEX code and you get the matching RGB and HSL values.',
+    answerZh:
+      '支持 HEX、RGB、HSL 三种格式互转。输入任意 HEX 色值，即可获得对应的 RGB 和 HSL 数值。',
+  },
+  {
+    questionEn: 'Is this color converter free?',
+    questionZh: '这个颜色转换工具是免费的吗？',
+    answerEn: 'Yes, it is completely free, with no signup or account needed.',
+    answerZh: '是的，完全免费，无需注册账号。',
+  },
+];
 
 export default function ColorConverter() {
   const tool = toolsById['color-converter'];
@@ -106,6 +153,17 @@ export default function ColorConverter() {
           </div>
         ))}
       </div>
+
+      {/* Local processing note */}
+      <LocalProcessingNote
+        en="All processing runs locally in your browser. The colors you pick will never be uploaded or stored on our server."
+        zh="所有计算在浏览器本地执行，你选择的颜色永远不会上传或保存在我们服务器。"
+      />
+
+      <HowToUse steps={howToSteps} />
+      <Faq items={faqs} />
+      <OtherTools currentToolId={tool.id} />
+
       <AdSlot slot="4444444444" />
     </div>
   );
