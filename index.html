@@ -98,9 +98,16 @@
       every tool on the site.
     -->
 
-    <!-- Google AdSense — site ownership verification -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6410031165107651"
-     crossorigin="anonymous"></script>
+    <!--
+      Google AdSense — site ownership verification.
+
+      Only the verification meta tag is placed statically. It proves we control
+      the site without downloading or executing any advertising code, which
+      keeps the consent-first design below intact. The AdSense library itself is
+      injected at runtime by `loadAdSense()` in src/lib/consent.ts, and only
+      after the visitor has actively granted permission via the banner.
+    -->
+    <meta name="google-adsense-account" content="ca-pub-6410031165107651" />
   </head>
   <body>
     <div id="root"></div>
