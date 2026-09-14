@@ -3,6 +3,7 @@ import { Search, Sparkles, Zap, Shield } from 'lucide-react';
 import { tools } from '@/data/tools';
 import { navigate } from '@/lib/router';
 import AdSlot from '@/components/AdSlot';
+import { usePageMeta, homeJsonLd } from '@/lib/usePageMeta';
 
 const categoryLabels: Record<string, string> = {
   text: 'Text Tools',
@@ -14,6 +15,16 @@ const categoryLabels: Record<string, string> = {
 const categoryOrder = ['text', 'dev', 'utility', 'health'];
 
 export default function HomePage() {
+  usePageMeta({
+    title: 'ToolKit — Free Online Tools for Everyone',
+    description:
+      'Use 6+ free online tools: password generator, word counter, unit converter, color converter, case converter and BMI calculator. No signup, no installs — everything runs privately in your browser.',
+    keywords:
+      'free online tools, password generator, word counter, unit converter, color converter, case converter, BMI calculator, browser tools',
+    path: '/',
+    jsonLd: homeJsonLd,
+  });
+
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
@@ -55,8 +66,9 @@ export default function HomePage() {
             <span className="text-brand-600">for everyday tasks</span>
           </h1>
           <p className="mt-4 text-lg text-ink-500 max-w-2xl mx-auto animate-slide-up">
-            Fast, privacy-friendly tools that work right in your browser.
-            No signups, no data collected.
+            Six fast, privacy-friendly tools that run right in your browser —
+            password generator, word counter, unit converter and more. No
+            signups, no installs, no data collected.
           </p>
 
           {/* Search */}
@@ -102,8 +114,17 @@ export default function HomePage() {
       {/* SEO intro */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 mb-8">
         <div className="rounded-2xl bg-brand-50 border border-brand-100 px-6 py-5">
-          <p className="text-ink-900 text-base leading-relaxed">
-            ToolKit 提供免费在线工具，包括文本处理、开发者工具和日常单位换算。无需注册、无隐藏费用，所有工具都在浏览器本地运行，即时出结果，保护用户隐私。适用于学生、开发者、编辑和日常办公人群。
+          <h2 className="text-lg font-semibold text-ink-900 mb-2">
+            Free online tools that just work
+          </h2>
+          <p className="text-ink-700 text-base leading-relaxed">
+            ToolKit brings together a growing collection of free online tools for
+            everyday tasks — text utilities, developer helpers, converters and
+            calculators. There is nothing to install and no account to create:
+            every tool runs entirely in your browser, so your input stays on your
+            device and results appear instantly. It is ideal for students,
+            writers, developers and anyone who needs a quick, reliable answer
+            without the clutter.
           </p>
         </div>
       </section>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CookieConsent from '@/components/CookieConsent';
 import HomePage from '@/pages/HomePage';
 import PasswordGenerator from '@/pages/tools/PasswordGenerator';
 import WordCounter from '@/pages/tools/WordCounter';
@@ -9,6 +10,10 @@ import ColorConverter from '@/pages/tools/ColorConverter';
 import CaseConverter from '@/pages/tools/CaseConverter';
 import BMICalculator from '@/pages/tools/BMICalculator';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import TermsOfService from '@/pages/TermsOfService';
+import Disclaimer from '@/pages/Disclaimer';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
 import { setRouter, currentPath, navigate } from '@/lib/router';
 import type { ToolId } from '@/data/tools';
 
@@ -21,6 +26,27 @@ const toolRoutes: Record<string, () => JSX.Element> = {
   'bmi-calculator': BMICalculator,
 };
 
+/** Static pages available at a fixed path. */
+const staticRoutes: Record<string, () => JSX.Element> = {
+  '/privacy-policy': PrivacyPolicy,
+  '/terms': TermsOfService,
+  '/disclaimer': Disclaimer,
+  '/about': About,
+  '/contact': Contact,
+};
+
+function NotFound({ title, message }: { title: string; message: string }) {
+  return (
+    <div className="max-w-2xl mx-auto py-20 px-4 text-center">
+      <h1 className="text-3xl font-bold text-ink-800 mb-3">{title}</h1>
+      <p className="text-ink-500 mb-6">{message}</p>
+      <button onClick={() => navigate('/')} className="btn-primary">
+        Back to all tools
+      </button>
+    </div>
+  );
+}
+
 function App() {
   const [path, setPath] = useState(currentPath());
 
@@ -28,36 +54,39 @@ function App() {
     setRouter((p: string) => setPath(p));
   }, []);
 
+  // The router state must also track browser back/forward and direct loads.
+  useEffect(() => {
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   // Parse route
   const toolMatch = path.match(/^\/tools\/(.+)$/);
   const toolId = toolMatch?.[1] as ToolId | undefined;
+  const StaticPage = staticRoutes[path];
 
   let page: JSX.Element;
   if (path === '/') {
     page = <HomePage />;
-  } else if (path === '/privacy-policy') {
-    page = <PrivacyPolicy />;
+  } else if (StaticPage) {
+    page = <StaticPage />;
   } else if (toolId && toolRoutes[toolId]) {
     const ToolComponent = toolRoutes[toolId];
     page = <ToolComponent />;
   } else if (toolId) {
     page = (
-      <div className="max-w-2xl mx-auto py-20 text-center">
-        <h1 className="text-3xl font-bold text-ink-800 mb-3">Tool not found</h1>
-        <p className="text-ink-500 mb-6">The tool you're looking for doesn't exist.</p>
-        <button onClick={() => navigate('/')} className="btn-primary">
-          Back to all tools
-        </button>
-      </div>
+      <NotFound
+        title="Tool not found"
+        message="The tool you're looking for doesn't exist."
+      />
     );
   } else {
     page = (
-      <div className="max-w-2xl mx-auto py-20 text-center">
-        <h1 className="text-3xl font-bold text-ink-800 mb-3">Page not found</h1>
-        <button onClick={() => navigate('/')} className="btn-primary">
-          Go home
-        </button>
-      </div>
+      <NotFound
+        title="Page not found"
+        message="The page you're looking for doesn't exist or may have been moved."
+      />
     );
   }
 
@@ -66,6 +95,7 @@ function App() {
       <Header currentPath={path} />
       <main className="flex-1">{page}</main>
       <Footer />
+      <CookieConsent />
     </div>
   );
 }

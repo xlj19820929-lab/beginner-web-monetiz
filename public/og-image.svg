@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="ToolKit  Free Online Tools for Everyone">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eefdf6"/>
+      <stop offset="55%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d7f9eb"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#16b67e"/>
+      <stop offset="100%" stop-color="#0a7554"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative dots -->
+  <g fill="#0f172a" opacity="0.05">
+    <circle cx="90" cy="80" r="4"/><circle cx="150" cy="80" r="4"/><circle cx="210" cy="80" r="4"/>
+    <circle cx="90" cy="140" r="4"/><circle cx="150" cy="140" r="4"/><circle cx="210" cy="140" r="4"/>
+  </g>
+
+  <!-- Logo mark -->
+  <rect x="80" y="150" width="110" height="110" rx="26" fill="url(#mark)"/>
+  <path d="M113 186 L138 186 L138 224 L113 224 Z M138 186 L163 186 L163 224 L138 224 Z" fill="#ffffff" opacity="0.95"/>
+  <circle cx="138" cy="196" r="6" fill="#16b67e"/>
+  <circle cx="138" cy="214" r="4" fill="#16b67e"/>
+
+  <text x="80" y="340" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="72" font-weight="800" fill="#0f172a">ToolKit</text>
+
+  <text x="80" y="404" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="40" font-weight="600" fill="#0b9466">Free Online Tools for Everyone</text>
+
+  <text x="80" y="462" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="27" font-weight="400" fill="#475569">Password generator · Word counter · Unit converter · Color converter</text>
+
+  <text x="80" y="502" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="27" font-weight="400" fill="#475569">Case converter · BMI calculator</text>
+
+  <!-- Trust chips -->
+  <g font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="22" font-weight="600">
+    <rect x="80" y="540" width="182" height="48" rx="24" fill="#16b67e" opacity="0.12"/>
+    <text x="106" y="571" fill="#0a7554">100% Free</text>
+
+    <rect x="280" y="540" width="212" height="48" rx="24" fill="#16b67e" opacity="0.12"/>
+    <text x="306" y="571" fill="#0a7554">No Signup</text>
+
+    <rect x="510" y="540" width="290" height="48" rx="24" fill="#16b67e" opacity="0.12"/>
+    <text x="536" y="571" fill="#0a7554">Runs in Your Browser</text>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+# Cloudflare Pages redirect rules for ToolKit.
+#
+# The site is a single-page app: every route is handled by index.html so that
+# deep links such as /about or /tools/word-counter resolve correctly on direct
+# navigation and on refresh, rather than returning a 404.
+#
+# Real assets (robots.txt, sitemap.xml, ads.txt, hashed JS/CSS) are matched by
+# Cloudflare's static asset handler first, so they are unaffected by this rule.
+
+/*  /index.html  200

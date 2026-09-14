@@ -1,0 +1,31 @@
+# robots.txt for ToolKit — https://toolkit-tools.pages.dev
+# Allows all major crawlers, including Googlebot, to index the site.
+
+User-agent: *
+Allow: /
+
+# Explicitly welcome Google's crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+# Ad and analytics crawlers need access so ads render correctly
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+User-agent: Google-AdsBot
+Allow: /
+
+# Block nothing that matters for indexing.
+# Note: there is no /admin or private area on this site.
+
+Sitemap: https://toolkit-tools.pages.dev/sitemap.xml
+Host: https://toolkit-tools.pages.dev
