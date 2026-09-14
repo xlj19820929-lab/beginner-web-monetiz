@@ -9,7 +9,7 @@ export const site = {
   name: 'ToolKit',
   tagline: 'Free Online Tools for Everyone',
   /** Canonical production URL — no trailing slash. */
-  url: 'https://toolkit-tools.pages.dev',
+  url: 'https://beginner-web-monetiz.pages.dev',
   email: 'xlj19820929@gmail.com',
   adsenseClient: 'ca-pub-6410031165107651',
   /** Bumped whenever any legal page changes; shown on each legal page. */

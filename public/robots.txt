@@ -1,4 +1,4 @@
-# robots.txt for ToolKit — https://toolkit-tools.pages.dev
+# robots.txt for ToolKit — https://beginner-web-monetiz.pages.dev
 # Allows all major crawlers, including Googlebot, to index the site.
 
 User-agent: *
@@ -27,5 +27,5 @@ Allow: /
 # Block nothing that matters for indexing.
 # Note: there is no /admin or private area on this site.
 
-Sitemap: https://toolkit-tools.pages.dev/sitemap.xml
-Host: https://toolkit-tools.pages.dev
+Sitemap: https://beginner-web-monetiz.pages.dev/sitemap.xml
+Host: https://beginner-web-monetiz.pages.dev
