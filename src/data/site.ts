@@ -10,7 +10,7 @@ export const site = {
   tagline: 'Free Online Tools for Everyone',
   /** Canonical production URL — no trailing slash. */
   url: 'https://toolkit-tools.pages.dev',
-  email: 'support@toolkit-tools.pages.dev',
+  email: 'xlj19820929@gmail.com',
   adsenseClient: 'ca-pub-6410031165107651',
   /** Bumped whenever any legal page changes; shown on each legal page. */
   legalUpdated: 'September 14, 2026',

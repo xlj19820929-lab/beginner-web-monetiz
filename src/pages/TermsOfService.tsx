@@ -194,8 +194,8 @@ export default function TermsOfService() {
             Contact page
           </a>{' '}
           or email us at{' '}
-          <ExtLink href="mailto:support@toolkit-tools.pages.dev">
-            support@toolkit-tools.pages.dev
+          <ExtLink href="mailto:xlj19820929@gmail.com">
+            xlj19820929@gmail.com
           </ExtLink>
           .
         </p>
