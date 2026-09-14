@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, Check, Copy } from 'lucide-react';
+import { RefreshCw, Check, Copy, HelpCircle } from 'lucide-react';
 import ToolHeader from '@/components/ToolHeader';
 import CopyButton from '@/components/CopyButton';
 import AdSlot from '@/components/AdSlot';
-import { toolsById } from '@/data/tools';
+import { toolsById, tools } from '@/data/tools';
+import { navigate } from '@/lib/router';
 
 const SETS = {
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -12,8 +13,48 @@ const SETS = {
   symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?',
 };
 
+const howToSteps = [
+  {
+    en: 'Adjust the password length and select character types.',
+    zh: '设置密码长度并勾选字符类型。',
+  },
+  {
+    en: 'Click generate to create a random secure password.',
+    zh: '点击生成，创建随机安全密码。',
+  },
+  {
+    en: 'Click copy button to copy your password to clipboard.',
+    zh: '点击复制按钮，将密码复制到剪贴板。',
+  },
+];
+
+const faqs = [
+  {
+    questionEn: 'Does your server save my generated passwords?',
+    questionZh: '服务器会保存我生成的密码吗？',
+    answerEn:
+      'No. Password generation happens locally inside your browser. We cannot see or store your passwords.',
+    answerZh:
+      '不会。密码在你的浏览器本地生成，我们无法查看、也不会存储你的密码。',
+  },
+  {
+    questionEn: 'What kind of characters can the password include?',
+    questionZh: '密码可以包含哪些字符？',
+    answerEn:
+      'It supports lowercase letters, uppercase letters, numbers and special symbols.',
+    answerZh: '支持小写字母、大写字母、数字以及特殊符号。',
+  },
+  {
+    questionEn: 'Can I customize the password length?',
+    questionZh: '我可以自定义密码长度吗？',
+    answerEn: 'Yes, you can set password length within the available range.',
+    answerZh: '可以，你可以在可选范围内自定义密码长度。',
+  },
+];
+
 export default function PasswordGenerator() {
   const tool = toolsById['password-generator'];
+  const otherTools = tools.filter((t) => t.id !== tool.id);
   const [length, setLength] = useState(16);
   const [opts, setOpts] = useState({
     upper: true,
@@ -180,6 +221,94 @@ export default function PasswordGenerator() {
           <CopyButton value={password} label="Copy password" />
         </div>
       )}
+
+      {/* Local processing note */}
+      <p className="text-sm text-ink-500 leading-relaxed mt-5">
+        All processing runs locally in your browser. Your generated password
+        will never be uploaded or stored on our server.
+        <br />
+        所有计算在浏览器本地执行，你生成的密码永远不会上传或保存在我们服务器。
+      </p>
+
+      {/* How to use */}
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold text-ink-900 mb-4">
+          How To Use <span className="text-ink-500 font-normal">使用方法</span>
+        </h2>
+        <ol className="space-y-3">
+          {howToSteps.map((step, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-brand-50 text-brand-600 text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                {i + 1}
+              </span>
+              <p className="text-sm text-ink-600 leading-relaxed">
+                {step.en}
+                <br />
+                {step.zh}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* FAQ */}
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold text-ink-900 mb-5">
+          Frequently Asked Questions{' '}
+          <span className="text-ink-500 font-normal">常见问题</span>
+        </h2>
+        <div className="space-y-6">
+          {faqs.map((faq, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <HelpCircle className="w-4 h-4 text-brand-600 shrink-0 mt-1" />
+              <div>
+                <p className="font-semibold text-ink-800 text-sm leading-relaxed">
+                  {faq.questionEn}
+                  <br />
+                  {faq.questionZh}
+                </p>
+                <p className="text-sm text-ink-500 leading-relaxed mt-1.5">
+                  {faq.answerEn}
+                  <br />
+                  {faq.answerZh}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Other tools */}
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold text-ink-900 mb-4">
+          Other Tools <span className="text-ink-500 font-normal">其他工具</span>
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {otherTools.map((other) => {
+            const Icon = other.icon;
+            return (
+              <button
+                key={other.id}
+                onClick={() => navigate(`/tools/${other.id}`)}
+                className="tool-card text-left group"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+                    <Icon className="w-6 h-6" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-ink-900 group-hover:text-brand-600 transition-colors">
+                      {other.name}
+                    </h3>
+                    <p className="text-sm text-ink-500 mt-0.5">{other.short}</p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       <AdSlot slot="5555555555" />
     </div>
   );
