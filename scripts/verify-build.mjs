@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { globSync } from 'node:fs';
 
 const files = [
@@ -49,8 +49,30 @@ for (const f of files) {
   console.log('');
 }
 
+// Cloudflare Pages serves 404.html (with a real 404 status) for unmatched
+// requests. Without it the SPA fallback would answer missing URLs with 200 and
+// a rendered "not found" view — a soft 404 that wastes crawl budget.
+const notFoundPath = 'dist/404.html';
+if (!existsSync(notFoundPath)) {
+  console.log('!! dist/404.html is missing — unmatched URLs would return a soft 404.');
+  problems += 1;
+} else {
+  const html = readFileSync(notFoundPath, 'utf8');
+  const hasNoIndex = /name="robots"[^>]*noindex/i.test(html);
+  const has404Copy = /Page not found/i.test(html);
+  if (!hasNoIndex || !has404Copy) {
+    console.log('!! dist/404.html is missing noindex or the "Page not found" copy.');
+    problems += 1;
+  } else {
+    console.log('404.html present, noindex, and self-contained.');
+  }
+}
+console.log('');
+
 // Any other stray HTML output?
-const extra = globSync('dist/**/*.html').filter((p) => !files.includes(p.replace(/\\/g, '/')));
+const extra = globSync('dist/**/*.html').filter(
+  (p) => !files.includes(p.replace(/\\/g, '/')) && p.replace(/\\/g, '/') !== notFoundPath
+);
 if (extra.length) {
   console.log('Unexpected extra HTML files:', extra);
   problems += extra.length;
