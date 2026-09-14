@@ -61,13 +61,11 @@
     </script>
 
     <!--
-      Google AdSense.
+      Google Consent Mode v2 — defaults.
 
-      Consent Mode v2 defaults to "denied" for advertising storage so that no
-      advertising cookies are used until the visitor grants consent through the
-      on-page cookie banner. The banner (see src/components/CookieConsent.tsx)
-      updates these signals. This keeps the site compliant with Google's EU user
-      consent policy and the GDPR.
+      All advertising and analytics storage is set to "denied" before any Google
+      script runs, so no advertising cookies can be set until the visitor grants
+      consent through the on-page cookie banner.
     -->
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -82,11 +80,23 @@
         wait_for_update: 500,
       });
     </script>
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6410031165107651"
-      crossorigin="anonymous"
-    ></script>
+
+    <!--
+      Google AdSense — loaded ON DEMAND, not on page load.
+
+      The AdSense library is deliberately NOT included as a static <script> tag
+      here. It is injected at runtime by `loadAdSense()` in src/lib/consent.ts,
+      and only after the visitor has actively granted permission via the banner.
+
+      Result:
+        - no consent recorded  -> AdSense script never requested
+        - "Essential only"     -> AdSense script never requested
+        - "Accept all"         -> AdSense script injected, ads may be shown
+
+      This satisfies the requirement that the advertising script must not be
+      loaded before the user consents. Visitors who never consent can still use
+      every tool on the site.
+    -->
   </head>
   <body>
     <div id="root"></div>

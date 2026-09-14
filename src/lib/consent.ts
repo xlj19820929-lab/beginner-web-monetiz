@@ -34,6 +34,42 @@ export function saveConsent(value: Exclude<ConsentValue, null>): void {
   }
 }
 
+/** Google AdSense publisher ID. */
+export const ADSENSE_CLIENT = 'ca-pub-6410031165107651';
+
+/**
+ * Injects the Google AdSense library into the document.
+ *
+ * Called ONLY after the visitor has granted consent, so that the advertising
+ * script is never downloaded or executed before permission is given. Safe to
+ * call repeatedly — the script is injected at most once.
+ */
+export function loadAdSense(): void {
+  if (typeof document === 'undefined') return;
+
+  // Already loaded or in the process of loading.
+  if (document.querySelector('script[data-adsense-loader]')) return;
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
+  script.crossOrigin = 'anonymous';
+  script.setAttribute('data-adsense-loader', '');
+
+  script.onload = () => {
+    // Ask AdSense to fill any <ins class="adsbygoogle"> slots on the page.
+    const w = window as Window & { adsbygoogle?: unknown[] };
+    w.adsbygoogle = w.adsbygoogle || [];
+    try {
+      w.adsbygoogle.push({});
+    } catch {
+      // Nothing to fill yet — slots will push on mount.
+    }
+  };
+
+  document.head.appendChild(script);
+}
+
 /**
  * Notifies Google AdSense of the visitor's consent state so that
  * personalised advertising is only requested when consent was granted.
@@ -43,6 +79,9 @@ export function saveConsent(value: Exclude<ConsentValue, null>): void {
  *     were defaulted to "denied" in index.html.
  *  2. AdSense's legacy `requestNonPersonalizedAds` flag, which is still honoured
  *     by classic AdSense tags.
+ *
+ * The AdSense library itself is loaded only when consent is granted — see
+ * `loadAdSense()`.
  */
 export function applyAdConsent(value: Exclude<ConsentValue, null>): void {
   if (typeof window === 'undefined') return;
@@ -66,9 +105,9 @@ export function applyAdConsent(value: Exclude<ConsentValue, null>): void {
   w.adsbygoogle = w.adsbygoogle || [];
   w.adsbygoogle.requestNonPersonalizedAds = granted ? 0 : 1;
 
-  try {
-    w.adsbygoogle.push({});
-  } catch {
-    // AdSense script not loaded yet — safe to ignore.
+  // 3. Load the advertising library only when permission was granted.
+  //    Before consent (or after an opt-out) the script is never requested.
+  if (granted) {
+    loadAdSense();
   }
 }
