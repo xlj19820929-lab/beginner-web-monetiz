@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-50 text-ink-900 font-sans antialiased;
+  }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .tool-card {
+    @apply bg-white rounded-2xl border border-ink-200 p-6 transition-all duration-200 hover:shadow-lg hover:border-brand-300 hover:-translate-y-0.5;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 text-white font-semibold transition-all duration-150 hover:bg-brand-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-ink-100 text-ink-700 font-medium transition-all duration-150 hover:bg-ink-200 active:scale-95;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-ink-600 font-medium transition-all duration-150 hover:bg-ink-100 hover:text-ink-900;
+  }
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl border border-ink-200 bg-white text-ink-900 placeholder:text-ink-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400;
+  }
+  .tool-shell {
+    @apply max-w-3xl mx-auto animate-slide-up;
+  }
+}
