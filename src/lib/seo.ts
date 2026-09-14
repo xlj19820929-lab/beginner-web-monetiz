@@ -29,8 +29,7 @@ export interface SeoConfig {
 }
 
 /** Create the tag if it is missing, then return it. */
-function ensureMeta(selector: string, create: () => HTMLElement): HTMLElement {
-  let el = document.head.querySelector<HTMLElement>(selector);
+function ensureMeta(selector: string, create: () => HTMLElement): HTMLElement {  let el = document.head.querySelector<HTMLElement>(selector);
   if (!el) {
     el = create();
     document.head.appendChild(el);

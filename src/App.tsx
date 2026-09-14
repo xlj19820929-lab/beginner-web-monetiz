@@ -61,13 +61,19 @@ function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
+  // Normalise the path before matching. Static hosts (Cloudflare Pages, most
+  // CDNs) may serve or redirect to a trailing-slash URL such as
+  // `/privacy-policy/`; without this, the exact-match lookups below would miss
+  // and every page would render as "not found".
+  const route = path.length > 1 ? path.replace(/\/+$/, '') : path;
+
   // Parse route
-  const toolMatch = path.match(/^\/tools\/(.+)$/);
+  const toolMatch = route.match(/^\/tools\/(.+)$/);
   const toolId = toolMatch?.[1] as ToolId | undefined;
-  const StaticPage = staticRoutes[path];
+  const StaticPage = staticRoutes[route];
 
   let page: JSX.Element;
-  if (path === '/') {
+  if (route === '/') {
     page = <HomePage />;
   } else if (StaticPage) {
     page = <StaticPage />;

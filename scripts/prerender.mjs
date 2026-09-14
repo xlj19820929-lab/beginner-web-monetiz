@@ -105,11 +105,19 @@ function startStaticServer() {
   });
 }
 
-/** Where a route's HTML file lives inside `dist/`. */
+/**
+ * Where a route's HTML file lives inside `dist/`.
+ *
+ * Cloudflare Pages treats a `route/index.html` pair as a *directory*, and
+ * redirects `/route` to `/route/` with a trailing slash. The site's router does
+ * exact string matching, so that redirect produced "Page not found" on every
+ * prerendered page. Writing `route.html` instead makes Cloudflare serve the
+ * file at the exact requested path, with no redirect.
+ */
 function outputPathFor(route) {
   return route === '/'
     ? join(DIST, 'index.html')
-    : join(DIST, route.replace(/^\//, ''), 'index.html');
+    : join(DIST, `${route.replace(/^\//, '')}.html`);
 }
 
 async function main() {

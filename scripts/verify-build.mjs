@@ -3,17 +3,17 @@ import { globSync } from 'node:fs';
 
 const files = [
   'dist/index.html',
-  'dist/about/index.html',
-  'dist/contact/index.html',
-  'dist/privacy-policy/index.html',
-  'dist/terms/index.html',
-  'dist/disclaimer/index.html',
-  'dist/tools/password-generator/index.html',
-  'dist/tools/word-counter/index.html',
-  'dist/tools/unit-converter/index.html',
-  'dist/tools/color-converter/index.html',
-  'dist/tools/case-converter/index.html',
-  'dist/tools/bmi-calculator/index.html',
+  'dist/about.html',
+  'dist/contact.html',
+  'dist/privacy-policy.html',
+  'dist/terms.html',
+  'dist/disclaimer.html',
+  'dist/tools/password-generator.html',
+  'dist/tools/word-counter.html',
+  'dist/tools/unit-converter.html',
+  'dist/tools/color-converter.html',
+  'dist/tools/case-converter.html',
+  'dist/tools/bmi-calculator.html',
 ];
 
 let problems = 0;
@@ -41,7 +41,7 @@ for (const f of files) {
   if (canonicalCount > 1) flags.push(`DUP-CANONICAL(${canonicalCount})`);
   if (flags.length) problems += 1;
 
-  console.log(`${f.replace('/index.html', '').replace('dist', '') || '/'}`);
+  console.log(`${f.replace('.html', '').replace('dist', '') || '/'}`);
   console.log(`   ${title}`);
   console.log(`   canonical=${canonical}`);
   console.log(`   adMeta=${adMeta} adScript=${adScript} titles=${titleCount} canonicals=${canonicalCount}`);
