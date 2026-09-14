@@ -1,8 +1,40 @@
 import LegalPageLayout, { Section, ExtLink } from '@/components/LegalPageLayout';
-import { usePageMeta } from '@/lib/usePageMeta';
+import { Faq } from '@/components/ToolExtras';
+import { usePageMeta, faqJsonLd, type FaqEntry } from '@/lib/usePageMeta';
 import { site } from '@/data/site';
 
 const LAST_UPDATED = site.legalUpdated;
+
+/**
+ * FAQ structured data for this page. Each answer restates what the sections
+ * below already say — Google requires marked-up Q&A to be answered on the page.
+ */
+const faqs: FaqEntry[] = [
+  {
+    questionEn: 'Are the tools on ToolKit free to use?',
+    questionZh: 'ToolKit 上的工具是免费使用的吗？',
+    answerEn:
+      'Yes. All tools are provided free of charge and the service is funded by advertising. No account, payment or registration is required.',
+    answerZh:
+      '是的。所有工具均免费提供，本站通过广告获得收入支持。无需账号、付费或注册。',
+  },
+  {
+    questionEn: 'Do I need an account to use the tools?',
+    questionZh: '使用这些工具需要注册账号吗？',
+    answerEn:
+      'No. Every tool runs entirely in your browser and there is no signup, login or user account of any kind.',
+    answerZh:
+      '不需要。所有工具完全在你的浏览器中运行，没有任何注册、登录或用户账号。',
+  },
+  {
+    questionEn: 'Can I rely on the results from the tools?',
+    questionZh: '我可以完全依赖工具给出的结果吗？',
+    answerEn:
+      'The tools are provided for general informational and convenience purposes only and do not constitute professional advice. The BMI calculator is not a medical device, and you are solely responsible for verifying any output before relying on it.',
+    answerZh:
+      '这些工具仅供一般信息参考和便利使用，不构成专业建议。BMI 计算器并非医疗设备，你需要自行负责在使用前核实任何输出结果。',
+  },
+];
 
 export default function TermsOfService() {
   usePageMeta({
@@ -11,6 +43,7 @@ export default function TermsOfService() {
       'The terms and conditions that govern your use of ToolKit free online tools, including acceptable use, intellectual property, disclaimers and limitation of liability.',
     keywords: 'terms of service, terms and conditions, acceptable use, user agreement, ToolKit',
     path: '/terms',
+    jsonLd: faqJsonLd(faqs),
   });
 
   return (
@@ -200,6 +233,8 @@ export default function TermsOfService() {
           .
         </p>
       </Section>
+
+      <Faq items={faqs} />
     </LegalPageLayout>
   );
 }

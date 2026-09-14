@@ -10,6 +10,7 @@ import {
   type FaqItem,
 } from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
+import { useToolSeo } from '@/lib/usePageMeta';
 
 type System = 'metric' | 'imperial';
 
@@ -109,6 +110,7 @@ const faqs: FaqItem[] = [
 
 export default function BMICalculator() {
   const tool = toolsById['bmi-calculator'];
+  useToolSeo(tool, faqs);
   const [system, setSystem] = useState<System>('metric');
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');

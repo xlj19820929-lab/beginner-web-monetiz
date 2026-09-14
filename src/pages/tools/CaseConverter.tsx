@@ -12,6 +12,7 @@ import {
   type FaqItem,
 } from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
+import { useToolSeo } from '@/lib/usePageMeta';
 
 const conversions = [
   { id: 'upper', label: 'UPPER CASE', fn: (t: string) => t.toUpperCase() },
@@ -68,6 +69,7 @@ const faqs: FaqItem[] = [
 
 export default function CaseConverter() {
   const tool = toolsById['case-converter'];
+  useToolSeo(tool, faqs);
   const [text, setText] = useState('');
   const [activeId, setActiveId] = useState('upper');
 

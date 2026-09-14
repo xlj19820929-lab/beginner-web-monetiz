@@ -11,6 +11,7 @@ import {
   type FaqItem,
 } from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
+import { useToolSeo } from '@/lib/usePageMeta';
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   let h = hex.replace('#', '').trim();
@@ -82,6 +83,7 @@ const faqs: FaqItem[] = [
 
 export default function ColorConverter() {
   const tool = toolsById['color-converter'];
+  useToolSeo(tool, faqs);
   const [hex, setHex] = useState('#16B67E');
   const [picker, setPicker] = useState('#16b67e');
 

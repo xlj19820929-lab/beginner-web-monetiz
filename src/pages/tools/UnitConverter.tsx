@@ -11,6 +11,7 @@ import {
   type FaqItem,
 } from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
+import { useToolSeo } from '@/lib/usePageMeta';
 
 type Category = 'length' | 'weight' | 'temperature';
 
@@ -103,6 +104,7 @@ const faqs: FaqItem[] = [
 
 export default function UnitConverter() {
   const tool = toolsById['unit-converter'];
+  useToolSeo(tool, faqs);
   const [category, setCategory] = useState<Category>('length');
   const [fromUnit, setFromUnit] = useState('m');
   const [toUnit, setToUnit] = useState('ft');

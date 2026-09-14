@@ -1,6 +1,7 @@
 import { Zap, Shield, DollarSign, Wrench, Users } from 'lucide-react';
 import LegalPageLayout, { Section } from '@/components/LegalPageLayout';
-import { usePageMeta } from '@/lib/usePageMeta';
+import { Faq } from '@/components/ToolExtras';
+import { usePageMeta, faqJsonLd, type FaqEntry } from '@/lib/usePageMeta';
 import { navigate } from '@/lib/router';
 import { tools } from '@/data/tools';
 import { site } from '@/data/site';
@@ -28,6 +29,38 @@ const values = [
   },
 ];
 
+/**
+ * FAQ structured data for this page. Each answer restates what the sections
+ * below already cover — Google requires marked-up Q&A to be answered on the
+ * page, so these mirror the visible content rather than introducing new claims.
+ */
+const faqs: FaqEntry[] = [
+  {
+    questionEn: 'Is ToolKit really free to use?',
+    questionZh: 'ToolKit 真的可以免费使用吗？',
+    answerEn:
+      'Yes. Every tool is free to use, with no account, subscription or payment of any kind. The site is funded by advertising so that the tools can stay free for individuals, students and professionals.',
+    answerZh:
+      '是的。所有工具均可免费使用，无需账号、订阅或任何付费。本站通过广告获得收入，以便让个人、学生和专业人士持续免费使用这些工具。',
+  },
+  {
+    questionEn: 'Do I need to create an account or give you my email address?',
+    questionZh: '我需要注册账号或提供邮箱地址吗？',
+    answerEn:
+      'No. We do not ask for accounts, email addresses or personal details. There is no signup and nothing to install.',
+    answerZh:
+      '不需要。我们不要求注册账号、邮箱地址或任何个人信息，无需注册也无需安装任何东西。',
+  },
+  {
+    questionEn: 'Does the content I enter leave my device?',
+    questionZh: '我输入的内容会离开我的设备吗？',
+    answerEn:
+      'No. Every tool runs entirely in your browser, so the text, numbers and other values you enter are processed on your device and never sent to our servers.',
+    answerZh:
+      '不会。所有工具完全在你的浏览器中运行，你输入的文本、数字等内容都在你的设备上处理，永远不会发送到我们的服务器。',
+  },
+];
+
 export default function About() {
   usePageMeta({
     title: 'About Us | ToolKit',
@@ -35,6 +68,7 @@ export default function About() {
       'Learn about ToolKit — free, privacy-friendly online tools that run entirely in your browser. Our mission, how we are funded and how to get in touch.',
     keywords: 'about ToolKit, free online tools, privacy-friendly tools, browser tools, our mission',
     path: '/about',
+    jsonLd: faqJsonLd(faqs),
   });
 
   return (
@@ -153,6 +187,8 @@ export default function About() {
           for the details.
         </p>
       </Section>
+
+      <Faq items={faqs} />
 
       <div className="not-prose pt-4">
         <button onClick={() => navigate('/')} className="btn-primary">

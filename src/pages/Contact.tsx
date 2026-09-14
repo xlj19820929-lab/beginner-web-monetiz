@@ -1,8 +1,41 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { navigate } from '@/lib/router';
+import { Faq } from '@/components/ToolExtras';
+import { usePageMeta, faqJsonLd, type FaqEntry } from '@/lib/usePageMeta';
 
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xwlkdjka';
+
+/**
+ * FAQ structured data for the contact page. Answers only state what the form
+ * and the page already make clear — no new promises about response times.
+ */
+const faqs: FaqEntry[] = [
+  {
+    questionEn: 'How can I contact ToolKit?',
+    questionZh: '我如何联系 ToolKit？',
+    answerEn:
+      'Use the contact form on this page to send us a message, or email us directly at the address shown below the form.',
+    answerZh:
+      '你可以使用本页面的联系表单给我们留言，或直接发送邮件到表单下方显示的邮箱地址。',
+  },
+  {
+    questionEn: 'Do I need an account to send a message?',
+    questionZh: '发送留言需要注册账号吗？',
+    answerEn:
+      'No. Simply fill in your name, email address and message, and submit the form. No account or registration is required.',
+    answerZh:
+      '不需要。只需填写你的姓名、邮箱和留言内容并提交表单即可，无需账号或注册。',
+  },
+  {
+    questionEn: 'What can I contact you about?',
+    questionZh: '我可以通过这个表单联系哪些事项？',
+    answerEn:
+      'You can send us feedback, bug reports, tool suggestions, or questions about the website, including anything relating to our Privacy Policy or Terms of Service.',
+    answerZh:
+      '你可以向我们发送反馈、问题报告、工具建议，或关于本站的任何疑问，包括与隐私政策或服务条款相关的事项。',
+  },
+];
 
 interface FormState {
   name: string;
@@ -19,6 +52,15 @@ interface FormErrors {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Contact() {
+  usePageMeta({
+    title: 'Contact Us | ToolKit',
+    description:
+      'Get in touch with ToolKit. Send us feedback, bug reports or tool suggestions through our contact form, or email us directly — no account required.',
+    keywords: 'contact ToolKit, contact us, feedback, bug report, tool suggestion, support',
+    path: '/contact',
+    jsonLd: faqJsonLd(faqs),
+  });
+
   const [form, setForm] = useState<FormState>({ name: '', email: '', message: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -169,6 +211,8 @@ export default function Contact() {
       <p className="text-center text-sm text-ink-400 mt-6">
         Email / 邮箱：xlj19820929@gmail.com
       </p>
+
+      <Faq items={faqs} />
 
       {/* Toast */}
       <div

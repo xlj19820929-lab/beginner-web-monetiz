@@ -11,6 +11,7 @@ import {
   type FaqItem,
 } from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
+import { useToolSeo } from '@/lib/usePageMeta';
 
 const howToSteps: BiText[] = [
   {
@@ -51,6 +52,7 @@ const faqs: FaqItem[] = [
 
 export default function WordCounter() {
   const tool = toolsById['word-counter'];
+  useToolSeo(tool, faqs);
   const [text, setText] = useState('');
 
   const stats = useMemo(() => {

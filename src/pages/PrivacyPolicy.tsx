@@ -1,8 +1,43 @@
 import LegalPageLayout, { Section, ExtLink } from '@/components/LegalPageLayout';
-import { usePageMeta } from '@/lib/usePageMeta';
+import { Faq } from '@/components/ToolExtras';
+import { usePageMeta, faqJsonLd, type FaqEntry } from '@/lib/usePageMeta';
 import { site } from '@/data/site';
 
 const LAST_UPDATED = site.legalUpdated;
+
+/**
+ * FAQ structured data for this page.
+ *
+ * The wording intentionally answers the same questions as the sections below
+ * (what we collect, cookies, opt-out) — Google requires the marked-up Q&A to be
+ * genuinely answered on the page, so keep these in step with the content.
+ */
+const faqs: FaqEntry[] = [
+  {
+    questionEn: 'Do you store the text or numbers I enter into your tools?',
+    questionZh: '你们会保存我输入到工具中的文本或数字吗？',
+    answerEn:
+      'No. All calculations, conversions and formatting happen in your browser using JavaScript. The content you enter is processed on your device only and is never transmitted to or stored by us.',
+    answerZh:
+      '不会。所有计算、换算和格式化都在你的浏览器中用 JavaScript 完成，你输入的内容只在你的设备上处理，永远不会传输给或存储于我们。',
+  },
+  {
+    questionEn: 'Does ToolKit use advertising cookies?',
+    questionZh: 'ToolKit 会使用广告 Cookie 吗？',
+    answerEn:
+      'We do not set our own advertising or tracking cookies. Third-party vendors including Google AdSense may use cookies to serve ads based on your prior visits to this and other websites, but only after you consent through our cookie banner.',
+    answerZh:
+      '我们不会设置自己的广告或追踪 Cookie。包括 Google AdSense 在内的第三方供应商可能会使用 Cookie，根据你此前对本站及其他网站的访问投放广告，但仅限于你通过 Cookie 横幅表示同意之后。',
+  },
+  {
+    questionEn: 'How can I opt out of personalised advertising?',
+    questionZh: '我如何关闭个性化广告？',
+    answerEn:
+      'You can opt out through Google Ads Settings at google.com/settings/ads, through industry tools such as aboutads.info/choices and networkadvertising.org/choices, or by adjusting your browser and device settings.',
+    answerZh:
+      '你可以通过 Google 广告设置（google.com/settings/ads）关闭，也可以使用 aboutads.info/choices、networkadvertising.org/choices 等行业工具，或调整浏览器和设备设置。',
+  },
+];
 
 export default function PrivacyPolicy() {
   usePageMeta({
@@ -12,6 +47,7 @@ export default function PrivacyPolicy() {
     keywords:
       'privacy policy, cookies, Google AdSense, personalised advertising, opt out, data protection, GDPR, CCPA',
     path: '/privacy-policy',
+    jsonLd: faqJsonLd(faqs),
   });
 
   return (
@@ -296,6 +332,8 @@ export default function PrivacyPolicy() {
           . We aim to respond to all legitimate requests within 30 days.
         </p>
       </Section>
+
+      <Faq items={faqs} />
     </LegalPageLayout>
   );
 }

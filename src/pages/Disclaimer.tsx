@@ -1,8 +1,40 @@
 import LegalPageLayout, { Section, ExtLink } from '@/components/LegalPageLayout';
-import { usePageMeta } from '@/lib/usePageMeta';
+import { Faq } from '@/components/ToolExtras';
+import { usePageMeta, faqJsonLd, type FaqEntry } from '@/lib/usePageMeta';
 import { site } from '@/data/site';
 
 const LAST_UPDATED = site.legalUpdated;
+
+/**
+ * FAQ structured data for this page. Each answer restates a disclaimer made in
+ * the sections below — Google requires marked-up Q&A to be answered on the page.
+ */
+const faqs: FaqEntry[] = [
+  {
+    questionEn: 'Are the results from these tools guaranteed to be accurate?',
+    questionZh: '这些工具的结果一定有保证准确吗？',
+    answerEn:
+      'No. The tools are provided on an "as is" and "as available" basis without warranties of any kind. While we aim for accuracy, we cannot guarantee that results are error-free or suitable for your purpose.',
+    answerZh:
+      '不是。这些工具按「现状」和「可用」状态提供，不附带任何形式的保证。虽然我们力求准确，但无法保证结果毫无差错或适用于你的特定用途。',
+  },
+  {
+    questionEn: 'Is the BMI calculator medical advice?',
+    questionZh: 'BMI 计算器提供的算医疗建议吗？',
+    answerEn:
+      'No. The BMI calculator is not a medical device and does not provide medical advice. It is for general informational purposes only — consult a qualified healthcare professional for health-related decisions.',
+    answerZh:
+      '不是。BMI 计算器并非医疗设备，不提供医疗建议，仅供一般信息参考。涉及健康相关的决定，请咨询专业的医疗人员。',
+  },
+  {
+    questionEn: 'Are you responsible for the content of external links or ads?',
+    questionZh: '你们对第三方链接或广告的内容负责吗？',
+    answerEn:
+      'No. The website contains links to external sites and displays third-party advertisements. We have no control over, and assume no responsibility for, their content, products, services or privacy practices.',
+    answerZh:
+      '不负责。本站包含指向外部网站的链接并展示第三方广告，我们无法控制也不承担其内容、产品、服务或隐私实践的任何责任。',
+  },
+];
 
 export default function Disclaimer() {
   usePageMeta({
@@ -11,6 +43,7 @@ export default function Disclaimer() {
       'Important disclaimers for ToolKit free online tools, including accuracy of results, the BMI calculator, external links, advertising and limitation of liability.',
     keywords: 'disclaimer, accuracy, no warranty, BMI disclaimer, external links, advertising disclosure',
     path: '/disclaimer',
+    jsonLd: faqJsonLd(faqs),
   });
 
   return (
@@ -161,6 +194,8 @@ export default function Disclaimer() {
           .
         </p>
       </Section>
+
+      <Faq items={faqs} />
     </LegalPageLayout>
   );
 }

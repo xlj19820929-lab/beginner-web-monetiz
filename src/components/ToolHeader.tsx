@@ -1,6 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
 import { navigate } from '@/lib/router';
-import { usePageMeta, toolJsonLd } from '@/lib/usePageMeta';
 import type { ToolMeta } from '@/data/tools';
 
 interface ToolHeaderProps {
@@ -8,20 +7,17 @@ interface ToolHeaderProps {
 }
 
 /**
- * Renders the heading for a tool page and applies that tool's SEO metadata
- * (title, meta description, canonical URL and SoftwareApplication JSON-LD).
+ * Renders the heading for a tool page.
+ *
+ * NOTE: this component deliberately does NOT call `usePageMeta`. The route's
+ * `<title>`, meta description, canonical URL and JSON-LD are applied by the
+ * tool page itself, which also owns the FAQ structured data. Keeping the SEO
+ * call in one place avoids two `#route-jsonld` writers racing each other —
+ * `setJsonLd` replaces the whole tag, so the last writer would win and the
+ * other schema type would be dropped.
  */
 export default function ToolHeader({ tool }: ToolHeaderProps) {
   const Icon = tool.icon;
-  const path = `/tools/${tool.id}`;
-
-  usePageMeta({
-    title: `${tool.name} — Free Online Tool | ToolKit`,
-    description: tool.description,
-    keywords: tool.keywords.join(', '),
-    path,
-    jsonLd: toolJsonLd(tool.name, tool.description, path),
-  });
 
   return (
     <div className="mb-8">

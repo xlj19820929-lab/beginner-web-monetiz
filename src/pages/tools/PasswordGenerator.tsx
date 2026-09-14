@@ -12,6 +12,7 @@ import {
   type FaqItem,
 } from '@/components/ToolExtras';
 import { toolsById } from '@/data/tools';
+import { useToolSeo } from '@/lib/usePageMeta';
 
 const SETS = {
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -61,6 +62,7 @@ const faqs: FaqItem[] = [
 
 export default function PasswordGenerator() {
   const tool = toolsById['password-generator'];
+  useToolSeo(tool, faqs);
   const [length, setLength] = useState(16);
   const [opts, setOpts] = useState({
     upper: true,
