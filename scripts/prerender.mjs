@@ -26,22 +26,36 @@ const DIST = join(__dirname, '..', 'dist');
 const PORT = 4319;
 
 /**
- * Pin Puppeteer's browser cache to a stable path, BEFORE Puppeteer is imported.
+ * Decide where Puppeteer should keep its browser.
  *
- * ES module imports are hoisted, so `import puppeteer` would run before any
- * statement below it. Puppeteer therefore has to be pulled in with a dynamic
- * import after this block, otherwise it reads the ambient PUPPETEER_CACHE_DIR
- * — which points at a per-session sandbox temp folder — and fails to find the
- * browser.
+ * Two environments must both work:
  *
- * Why this matters: the user relocated TEMP to F: to stop C: filling up, and
- * Puppeteer derives its default cache from TEMP. A ~700 MB browser download
- * does not belong in a volatile temp directory, so it lives on F: instead.
+ *   Local (Windows dev box)
+ *     The user relocated TEMP to F: so C: stops filling up. Puppeteer derives
+ *     its default cache from TEMP, and a ~700 MB browser does not belong in a
+ *     volatile per-session temp folder, so the browser lives on F:.
  *
- * Set PUPPETEER_CACHE_DIR in the environment to override.
+ *   CI (Cloudflare Pages)
+ *     There is no F: drive, and no browser is preinstalled, so Puppeteer's own
+ *     default must be used and the browser downloaded during the build.
+ *
+ * The chosen directory is returned; the caller installs the browser there if
+ * it is missing.
  */
-const PUPPETEER_CACHE = process.env.PUPPETEER_CACHE_DIR || 'F:\\Tools\\puppeteer-cache';
-process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE;
+function resolveCacheDir() {
+  if (process.env.PUPPETEER_CACHE_DIR) return process.env.PUPPETEER_CACHE_DIR;
+
+  // Only redirect on a machine that actually has the F: drive.
+  if (process.platform === 'win32' && existsSync('F:\\')) {
+    return 'F:\\Tools\\puppeteer-cache';
+  }
+
+  // Otherwise leave Puppeteer's default in place (CI / other platforms).
+  return undefined;
+}
+
+const CACHE_DIR = resolveCacheDir();
+if (CACHE_DIR) process.env.PUPPETEER_CACHE_DIR = CACHE_DIR;
 
 const { default: puppeteer } = await import('puppeteer');
 
@@ -140,39 +154,70 @@ function outputPathFor(route) {
 }
 
 /**
- * Locate the Chrome binary that Puppeteer downloaded.
+ * Locate the Chrome binary Puppeteer uses.
  *
- * Puppeteer resolves its cache from `PUPPETEER_CACHE_DIR`, but some
- * environments (CI sandboxes, the editor's own tooling) predefine that variable
- * to a per-session temp folder and override any value set here. Passing
- * `executablePath` explicitly sidesteps that resolution entirely, which also
- * keeps the ~700 MB browser out of a volatile temp directory.
+ * Passing `executablePath` explicitly sidesteps Puppeteer's cache resolution,
+ * which some environments predefine to a per-session temp folder. The layout
+ * differs per platform, so both are handled:
+ *
+ *   Windows  <root>/chrome/win64-<ver>/chrome-win64/chrome.exe
+ *   Linux    <root>/chrome/linux-<ver>/chrome-linux64/chrome
  */
 function findChromeExecutable() {
   const candidates = [
     process.env.PUPPETEER_CACHE_DIR,
-    'F:\\Tools\\puppeteer-cache',
-    join(process.env.USERPROFILE || '', '.cache', 'puppeteer'),
+    CACHE_DIR,
+    process.platform === 'win32' ? 'F:\\Tools\\puppeteer-cache' : null,
+    process.env.USERPROFILE ? join(process.env.USERPROFILE, '.cache', 'puppeteer') : null,
+    process.env.HOME ? join(process.env.HOME, '.cache', 'puppeteer') : null,
   ].filter(Boolean);
+
+  const isWin = process.platform === 'win32';
+  const exeName = isWin ? 'chrome.exe' : 'chrome';
+  const innerDirs = isWin
+    ? ['chrome-win64', 'chrome-win32', join('chrome', 'win64'), join('chrome', 'win32'), '']
+    : ['chrome-linux64', 'chrome-linux', join('chrome', 'linux64'), join('chrome', 'linux'), ''];
 
   for (const root of candidates) {
     const chromeDir = join(root, 'chrome');
     if (!existsSync(chromeDir)) continue;
 
-    // Layout: <root>/chrome/win64-<version>/chrome-win64/chrome.exe
     for (const versionDir of readdirSync(chromeDir)) {
-      for (const inner of ['chrome-win64', 'chrome-win32', join('chrome', 'win64'), join('chrome', 'win32')]) {
-        const exe = join(chromeDir, versionDir, inner, 'chrome.exe');
+      for (const inner of innerDirs) {
+        const exe = join(chromeDir, versionDir, inner, exeName);
         if (existsSync(exe)) return exe;
       }
-      const direct = join(chromeDir, versionDir, 'chrome.exe');
-      if (existsSync(direct)) return direct;
     }
   }
   return null;
 }
 
-const CHROME_EXECUTABLE = findChromeExecutable();
+/**
+ * Ensure a browser is available, downloading it if necessary.
+ *
+ * Local builds reuse the browser already on F:. CI builds have no cache, so
+ * Puppeteer is asked to fetch one; that download is cached by the platform
+ * between builds when possible.
+ */
+async function ensureBrowser() {
+  const existing = findChromeExecutable();
+  if (existing) {
+    console.log(`Using existing Chrome: ${existing}`);
+    return existing;
+  }
+
+  console.log('No Chrome found; downloading via Puppeteer…');
+  const browser = await puppeteer.install({ browser: 'chrome' });
+  const installed = browser?.executablePath || findChromeExecutable();
+  if (!installed) {
+    throw new Error(
+      'Puppeteer could not provide a Chrome build. ' +
+        'Run `npx puppeteer browsers install chrome` and retry.'
+    );
+  }
+  console.log(`Installed Chrome: ${installed}`);
+  return installed;
+}
 
 async function main() {
   if (!existsSync(join(DIST, 'index.html'))) {
@@ -180,20 +225,16 @@ async function main() {
     process.exit(1);
   }
 
+  const chromePath = await ensureBrowser();
+
   const server = await startStaticServer();
   console.log(`Prerendering ${ROUTES.length} routes from http://127.0.0.1:${PORT}`);
 
   const browser = await puppeteer.launch({
     headless: true,
-    ...(CHROME_EXECUTABLE ? { executablePath: CHROME_EXECUTABLE } : {}),
+    executablePath: chromePath,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
-
-  if (!CHROME_EXECUTABLE) {
-    console.warn(
-      'Warning: no pinned Chrome found; relying on Puppeteer default resolution.'
-    );
-  }
 
   let failures = 0;
 
