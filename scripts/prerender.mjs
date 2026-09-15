@@ -17,14 +17,33 @@
 
 import { createServer } from 'node:http';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import puppeteer from 'puppeteer';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = join(__dirname, '..', 'dist');
 const PORT = 4319;
+
+/**
+ * Pin Puppeteer's browser cache to a stable path, BEFORE Puppeteer is imported.
+ *
+ * ES module imports are hoisted, so `import puppeteer` would run before any
+ * statement below it. Puppeteer therefore has to be pulled in with a dynamic
+ * import after this block, otherwise it reads the ambient PUPPETEER_CACHE_DIR
+ * — which points at a per-session sandbox temp folder — and fails to find the
+ * browser.
+ *
+ * Why this matters: the user relocated TEMP to F: to stop C: filling up, and
+ * Puppeteer derives its default cache from TEMP. A ~700 MB browser download
+ * does not belong in a volatile temp directory, so it lives on F: instead.
+ *
+ * Set PUPPETEER_CACHE_DIR in the environment to override.
+ */
+const PUPPETEER_CACHE = process.env.PUPPETEER_CACHE_DIR || 'F:\\Tools\\puppeteer-cache';
+process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE;
+
+const { default: puppeteer } = await import('puppeteer');
 
 /** Every route that gets its own static HTML file. */
 const ROUTES = [
@@ -120,6 +139,41 @@ function outputPathFor(route) {
     : join(DIST, `${route.replace(/^\//, '')}.html`);
 }
 
+/**
+ * Locate the Chrome binary that Puppeteer downloaded.
+ *
+ * Puppeteer resolves its cache from `PUPPETEER_CACHE_DIR`, but some
+ * environments (CI sandboxes, the editor's own tooling) predefine that variable
+ * to a per-session temp folder and override any value set here. Passing
+ * `executablePath` explicitly sidesteps that resolution entirely, which also
+ * keeps the ~700 MB browser out of a volatile temp directory.
+ */
+function findChromeExecutable() {
+  const candidates = [
+    process.env.PUPPETEER_CACHE_DIR,
+    'F:\\Tools\\puppeteer-cache',
+    join(process.env.USERPROFILE || '', '.cache', 'puppeteer'),
+  ].filter(Boolean);
+
+  for (const root of candidates) {
+    const chromeDir = join(root, 'chrome');
+    if (!existsSync(chromeDir)) continue;
+
+    // Layout: <root>/chrome/win64-<version>/chrome-win64/chrome.exe
+    for (const versionDir of readdirSync(chromeDir)) {
+      for (const inner of ['chrome-win64', 'chrome-win32', join('chrome', 'win64'), join('chrome', 'win32')]) {
+        const exe = join(chromeDir, versionDir, inner, 'chrome.exe');
+        if (existsSync(exe)) return exe;
+      }
+      const direct = join(chromeDir, versionDir, 'chrome.exe');
+      if (existsSync(direct)) return direct;
+    }
+  }
+  return null;
+}
+
+const CHROME_EXECUTABLE = findChromeExecutable();
+
 async function main() {
   if (!existsSync(join(DIST, 'index.html'))) {
     console.error('dist/index.html not found — run `npm run build` first.');
@@ -131,8 +185,15 @@ async function main() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    ...(CHROME_EXECUTABLE ? { executablePath: CHROME_EXECUTABLE } : {}),
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
+
+  if (!CHROME_EXECUTABLE) {
+    console.warn(
+      'Warning: no pinned Chrome found; relying on Puppeteer default resolution.'
+    );
+  }
 
   let failures = 0;
 
